@@ -19,19 +19,25 @@ class MasterController extends Controller
 	public function create(Request $request)
 	{
 
+		// Select all records from data source "data_source_x"
 		$data = DB::select("SELECT * FROM `data_source_x`");
+		// Select all records from table "property_types"
 		$PropertyTypes = DB::select("SELECT * FROM `property_types`");
+		// Select all records from table "property_purposes"
 		$PropertyPurpose = DB::select("SELECT * FROM `property_purposes`");
+		// Select all records from table "aminities"
 		$Aminities = DB::select("SELECT * FROM `aminities`");
+		// Select all records from table "cities"
 		$cities = DB::select("SELECT * FROM `cities`");
-
+	
+		// Initialize order id
 		$orderid = 256781;
 
 
-
+		// Loop through each record in $data
 		foreach ($data as $d) {
 
-			//Select User data from data source and insert them in to user table
+			 // Create a new user record
 
 			$t = new User();
 			$t->name = trim($d->name);
@@ -47,7 +53,7 @@ class MasterController extends Controller
 			$UserId = $t->id;
 
 
-
+			// Create a new order record
 			$t = new Order();
 			$t->order_id = '#' . ++$orderid;
 			$t->user_id = $UserId;
@@ -66,9 +72,11 @@ class MasterController extends Controller
 			$t->save();
 
 
-
+			// Create a new property record
 			$t = new Propertie();
 			$t->user_id = $UserId;
+
+			// Get the property type id from $PropertyTypes
 			foreach ($PropertyTypes as $p) {
 
 				if ($d->category == $p->type) {
@@ -76,6 +84,8 @@ class MasterController extends Controller
 				}
 
 			}
+
+			 // Get the city id from $cities
 			foreach ($cities as $c) {
 
 				if (strpos($d->address, $c->name) !== false) {
@@ -85,6 +95,8 @@ class MasterController extends Controller
 			}
 			
 			$t->listing_package_id = '3';
+
+			// Looping through the $PropertyPurpose array to get the property purpose id
 			foreach ($PropertyPurpose as $pp) {
 
 				if (strpos($d->details, $pp->purpose) !== false) {
@@ -107,10 +119,11 @@ class MasterController extends Controller
 
 
 
-
+			// Splitting the facilities string into an array using the "," as a separator
 			$facilities = trim($d->facilities);
 			$facilities = explode(",", $facilities);
 
+			// Looping through the facilities array
 			for ($i = 0; $i < count($facilities); $i++) {
 
 				$t = new PropertyAminitie();
@@ -140,9 +153,7 @@ class MasterController extends Controller
 
 		}
 
-		
-
-		// echo "<script>console.log('User data saved successfully.');</script>";
+	
 
 
 		return response()->json(['Data has been imported successfully!']);
